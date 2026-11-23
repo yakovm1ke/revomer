@@ -4,11 +4,16 @@ const pickBtn = document.getElementById("pick-btn");
 const listEl = document.getElementById("list");
 const emptyEl = document.getElementById("empty");
 const statusEl = document.getElementById("status");
+const statusTextEl = document.getElementById("status-text");
+const undoBtn = document.getElementById("undo-btn");
 const newSelectorInput = document.getElementById("new-selector");
 const addBtn = document.getElementById("add-btn");
+const clearBtn = document.getElementById("clear-btn");
 
 let tabId = null;
 let items = [];
+let undoState = null;
+let undoTimer = null;
 
 init();
 
@@ -46,18 +51,43 @@ function setControlsDisabled(disabled) {
   newSelectorInput.disabled = disabled;
 }
 
-function showStatus(text) {
-  statusEl.textContent = text;
+function showStatus(text, withUndo = false) {
+  statusTextEl.textContent = text;
   statusEl.hidden = !text;
+  undoBtn.hidden = !withUndo;
 }
+
+function requestUndo(snapshot, message) {
+  undoState = { items: snapshot };
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(() => {
+    undoState = null;
+    showStatus("");
+  }, 5000);
+  showStatus(message, true);
+}
+
+undoBtn.addEventListener("click", async () => {
+  if (!undoState) return;
+  clearTimeout(undoTimer);
+  items = undoState.items;
+  undoState = null;
+  showStatus("");
+  await syncState();
+  render();
+});
 
 function render() {
   listEl.textContent = "";
   emptyEl.hidden = items.length > 0;
+  clearBtn.hidden = items.length === 0;
 
   items.forEach((item, index) => {
     const li = document.createElement("li");
     li.className = "item";
+
+    const row = document.createElement("div");
+    row.className = "item__row";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -85,12 +115,26 @@ function render() {
     removeBtn.title = "Удалить из списка";
     removeBtn.textContent = "×";
     removeBtn.addEventListener("click", () => {
+      const snapshot = items.slice();
       items.splice(index, 1);
       syncState();
       render();
+      requestUndo(snapshot, "Правило удалено.");
     });
 
-    li.append(checkbox, input, removeBtn);
+    const commentInput = document.createElement("input");
+    commentInput.type = "text";
+    commentInput.className = "item__caption";
+    commentInput.value = item.comment || "";
+    commentInput.placeholder = "Подпись";
+    commentInput.title = "Подпись к правилу";
+    commentInput.addEventListener("change", () => {
+      items[index].comment = commentInput.value.trim();
+      syncState();
+    });
+
+    row.append(checkbox, input, removeBtn);
+    li.append(row, commentInput);
     listEl.appendChild(li);
   });
 }
@@ -98,7 +142,7 @@ function render() {
 async function syncState() {
   try {
     await sendToContent({ type: "REVOMER_SET_STATE", items });
-    showStatus("");
+    if (!undoState) showStatus("");
   } catch {
     showStatus("Не удалось сохранить изменения.");
   }
@@ -114,7 +158,7 @@ function generateId() {
 async function addManualItem() {
   const selector = newSelectorInput.value.trim();
   if (!selector) return;
-  items.push({ id: generateId(), selector, hidden: true });
+  items.push({ id: generateId(), selector, hidden: true, comment: "" });
   newSelectorInput.value = "";
   await syncState();
   render();
@@ -127,6 +171,19 @@ newSelectorInput.addEventListener("keydown", (e) => {
     e.preventDefault();
     addManualItem();
   }
+});
+
+clearBtn.addEventListener("click", async () => {
+  if (items.length === 0) return;
+  const confirmed = window.confirm(
+    "Удалить все элементы из списка? Скрытые элементы на странице снова появятся."
+  );
+  if (!confirmed) return;
+  const snapshot = items.slice();
+  items = [];
+  await syncState();
+  render();
+  requestUndo(snapshot, `Удалено правил: ${snapshot.length}.`);
 });
 
 pickBtn.addEventListener("click", async () => {

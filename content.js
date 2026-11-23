@@ -23,12 +23,20 @@
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed)
-        ? parsed.filter((item) => item && typeof item.selector === "string")
-        : [];
+      return Array.isArray(parsed) ? parsed.map(normalizeItem).filter(Boolean) : [];
     } catch {
       return [];
     }
+  }
+
+  function normalizeItem(item) {
+    if (!item || typeof item.selector !== "string") return null;
+    return {
+      id: typeof item.id === "string" ? item.id : generateId(),
+      selector: item.selector,
+      hidden: Boolean(item.hidden),
+      comment: typeof item.comment === "string" ? item.comment : "",
+    };
   }
 
   function saveItems() {
@@ -133,6 +141,19 @@
     applyStyleTag();
     applyInlineTo(document);
     ensureObserver();
+    updateBadge();
+  }
+
+  // ---------- бейдж на иконке ----------
+
+  function updateBadge() {
+    try {
+      chrome.runtime.sendMessage({ type: "REVOMER_BADGE", count: items.length }, () => {
+        void chrome.runtime.lastError;
+      });
+    } catch {
+      // background недоступен — бейдж не критичен
+    }
   }
 
   // ---------- генерация CSS-селектора (как в DevTools) ----------
@@ -204,8 +225,9 @@
         position: "fixed",
         zIndex: "2147483647",
         pointerEvents: "none",
-        border: "2px solid #4c8dff",
-        background: "rgba(76, 141, 255, 0.15)",
+        border: "2px solid #ff8c00",
+        background: "rgba(255, 140, 0, 0.15)",
+        borderRadius: "4px",
         display: "none",
         boxSizing: "border-box",
       });
@@ -220,11 +242,12 @@
         position: "fixed",
         zIndex: "2147483647",
         pointerEvents: "none",
-        background: "#1f2937",
+        background: "#16161a",
         color: "#ffffff",
+        border: "1px solid #ff8c00",
         font: "12px/1.4 monospace",
         padding: "4px 8px",
-        borderRadius: "4px",
+        borderRadius: "6px",
         maxWidth: "60vw",
         overflowWrap: "anywhere",
         display: "none",
@@ -313,7 +336,7 @@
     const target = hoveredEl || e.target;
     if (target && target.nodeType === 1 && !isOwnNode(target)) {
       const selector = getCssSelector(target);
-      items.push({ id: generateId(), selector, hidden: true });
+      items.push({ id: generateId(), selector, hidden: true, comment: "" });
       saveItems();
       applyHiding();
     }
@@ -344,13 +367,7 @@
 
       case "REVOMER_SET_STATE":
         if (Array.isArray(message.items)) {
-          items = message.items
-            .filter((item) => item && typeof item.selector === "string")
-            .map((item) => ({
-              id: typeof item.id === "string" ? item.id : generateId(),
-              selector: item.selector,
-              hidden: Boolean(item.hidden),
-            }));
+          items = message.items.map(normalizeItem).filter(Boolean);
           saveItems();
           applyHiding();
         }
