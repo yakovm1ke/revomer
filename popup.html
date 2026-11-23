@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Revomer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="title">Revomer</h1>
+    </header>
+
+    <button id="pick-btn" class="pick-btn" type="button">Выбрать элемент</button>
+    <p class="hint">Попап закроется, наведите курсор на элемент и кликните. Esc — отмена.</p>
+
+    <p id="status" class="status" hidden></p>
+
+    <div class="add-row">
+      <input
+        id="new-selector"
+        class="add-row__input"
+        type="text"
+        placeholder="Ввести CSS-селектор вручную"
+      />
+      <button id="add-btn" class="add-row__btn" type="button" title="Добавить в список">
+        +
+      </button>
+    </div>
+
+    <ul id="list" class="list"></ul>
+    <p id="empty" class="empty" hidden>
+      Элементов пока нет. Нажмите «Выбрать элемент» и кликните по элементу на странице.
+    </p>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

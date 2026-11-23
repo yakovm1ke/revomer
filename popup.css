@@ -1,0 +1,159 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  margin: 0;
+  padding: 12px;
+  font: 13px/1.4 -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1f2937;
+  background: #ffffff;
+}
+
+.header {
+  margin-bottom: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pick-btn {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #4c8dff;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pick-btn:hover {
+  background: #3b7def;
+}
+
+.pick-btn:disabled {
+  background: #9ca3af;
+  cursor: default;
+}
+
+.hint {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.status {
+  margin: 8px 0 0;
+  color: #b45309;
+  font-size: 12px;
+}
+
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.add-row__input {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font: 12px ui-monospace, monospace;
+  color: #1f2937;
+}
+
+.add-row__input:focus {
+  outline: 2px solid rgba(76, 141, 255, 0.4);
+  border-color: #4c8dff;
+}
+
+.add-row__btn {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: #4c8dff;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.add-row__btn:hover {
+  background: #3b7def;
+}
+
+.add-row__btn:disabled {
+  background: #9ca3af;
+  cursor: default;
+}
+
+.list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.item__checkbox {
+  flex: none;
+  margin: 0;
+}
+
+.item__selector {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font: 12px ui-monospace, monospace;
+  color: #1f2937;
+}
+
+.item__selector:focus {
+  outline: 2px solid rgba(76, 141, 255, 0.4);
+  border-color: #4c8dff;
+}
+
+.item__remove {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.item__remove:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.empty {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 12px;
+}
